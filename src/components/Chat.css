@@ -1,0 +1,11 @@
+.Chat {
+  height: 95vh;
+  width: 95vw;
+  border-radius: 5px;
+  overflow: hidden;
+  background-color: thistle;
+}
+
+.ChatArea1 {
+  background-color: coral;
+}

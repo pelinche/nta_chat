@@ -1,0 +1,10 @@
+.UsersList {
+  display: flex;
+  flex-basis: 250px;
+
+  justify-content: center;
+  align-items: top;
+  text-align: center;
+  color: black;
+  background: slategray;
+}
