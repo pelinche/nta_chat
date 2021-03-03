@@ -1,9 +1,4 @@
-import BodyChat from './BodyChat';
-
 import './Chat.css';
-import SendMessage from './SendMessage';
-import UsersList from './UsersList';
-
 
 export default function Chat(){
 
@@ -11,11 +6,37 @@ export default function Chat(){
     <>
       <div className="Chat">
         <h1>Chat</h1>
-        <div className="ChatArea1">
-          <UsersList />
+        <div className="ChatArea">
+          <div className="UsersList">
+            <h3>UserList</h3>
+            <ul>
+              <li>
+                User1
+              </li>
+              <li>
+                User1
+              </li>
+              <li>
+                User1
+              </li>
+            </ul>            
+          </div>
+
+          
           <div className="Body">
-            <BodyChat />
-            <SendMessage />
+            <div className="HeadArea">
+              Cabeçalho da conversa
+            </div>
+
+            <div className="MessagesArea">
+              messageArea
+            </div>
+
+            <div className="FooterChat">
+              footer
+            </div>
+
+            
             
           </div>
         </div>

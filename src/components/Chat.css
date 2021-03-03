@@ -1,11 +1,43 @@
 .Chat {
   height: 95vh;
   width: 95vw;
-  border-radius: 5px;
+  border-radius: 10px;
   overflow: hidden;
   background-color: thistle;
+  display: flex;
+  flex-direction: column;
 }
 
-.ChatArea1 {
+.ChatArea {
   background-color: coral;
+  display: flex;
+  flex-grow: 1;
+}
+
+.UsersList {
+  flex-basis: 250px;
+  background-color: bisque;
+  flex-grow: 1;
+}
+
+.Body {
+  background-color: cornsilk;
+  flex-basis: 90%;
+  display: flex;
+  flex-direction: column;
+}
+
+.HeadArea {
+  background-color: darkmagenta;
+  flex-basis: 60px;
+}
+
+.MessagesArea {
+  background-color: darkkhaki;
+  flex-grow: 1;
+}
+
+.FooterChat {
+  background-color: darkcyan;
+  flex-basis: 60px;
 }
