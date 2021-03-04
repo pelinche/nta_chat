@@ -1,8 +1,13 @@
 import './Chat.css';
 import React, { useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
+import axios from 'axios';
+
 const { client, xml } = require('@xmpp/client');
 const debug = require('@xmpp/debug');
+
+
+const baseurl = 'http://177.125.244.8:5280/api';
 
 
 //const URL = 'ws://127.0.0.1:5280/websocket';
@@ -13,13 +18,16 @@ const DOMAIN = 'localhost';
 
 
 export default function Chat(){
-  console.log('Load Function');
   const history = useHistory();
 
   const [firstAcess, setFirstAcess] = useState(true);
   const [userName, setUserName] = useState(localStorage.getItem('username'));
   const [password, setPassword] = useState(localStorage.getItem('password'));
   const [xmppStatus, setXmppStatus] = useState('Offline');
+  const [messages, setMessages] = useState([])
+
+  const [registeredUsers,setRegisteredUsers] = useState([]);
+  
 
   const [clientXmpp, setClientXmpp] = useState(
     client({
@@ -37,9 +45,6 @@ export default function Chat(){
 
 
   const connect = () =>{
-    console.log('Username:'+userName);
-    console.log('Password:'+password);
-    console.log('Starting connection');
 
     if(!userName  || !password ){
       localStorage.removeItem('username');
@@ -47,11 +52,40 @@ export default function Chat(){
       history.push('/login');
     }else{ 
       
+      //get list of users...
+      getRegisteredUsers();
+
+
       doConnection();
     }
 
     
   }
+
+
+  const getRegisteredUsers = async () =>{
+
+    const res = await axios.post( baseurl+"/registered_users", {
+      "host": "localhost"
+    }, {
+      auth: {
+        username: 'admin@localhost',
+        password: 'password'
+      }
+    });
+    if(res.status === 200){
+
+      let arrayresult = res.data.filter(name => {
+        return name !== 'luis';
+    })
+
+      setRegisteredUsers(arrayresult);
+    }else{
+      setRegisteredUsers([]);
+    }
+    
+  }
+
 
   const doConnection = () =>{
 
@@ -110,6 +144,12 @@ export default function Chat(){
         console.log('Message from: ' + stanza.attrs.from);
         console.log('Message To: ' + stanza.attrs.to);
         //console.log("Message ? ",stanza.children.attrs[0]);
+        
+
+
+
+
+        setMessages(oldarray => [...oldarray,msgreceived])
 
         let msgreceived = '' + stanza.getChild('body');
         //        setMessasges([messages, msgreceived]);
@@ -117,7 +157,6 @@ export default function Chat(){
         addLog("Received: "+msgreceived);
 
         console.log('Received: ', stanza);
-        //console.log('Message Received: ' + stanza.getChild('body'));
       } else {
         //console.log('Other: ',stanza);
       }
@@ -125,7 +164,6 @@ export default function Chat(){
 
     clientXmpp.on('online', (address) => {
       // Makes itself available
-      console.log('Ficou online',clientXmpp.status);
       clientXmpp.send(xml('presence'));
     });
 
@@ -153,7 +191,7 @@ export default function Chat(){
   return(
     <>
       <div className="Chat">
-        <h1>Chat</h1>
+        <h3>Chat</h3>
         <div className="ChatArea">
           <div className="UsersList">
           <p>Username: {userName}</p>
@@ -169,54 +207,18 @@ export default function Chat(){
             <h3>UserList</h3>
             
             <ul>
-            <li>
-                User1
-              </li>
-              <li>
-                User1
-              </li>
-              <li>
-                User1
-              </li>
-              <li>
-                User1
-              </li>
-              <li>
-                User1
-              </li>
-              <li>
-                User1
-              </li>
-              <li>
-                User1
-              </li>
-              <li>
-                User1
-              </li>
-              <li>
-                User1
-              </li>
-              <li>
-                User1
-              </li>
-              <li>
-                User1
-              </li>
-              <li>
-                User1
-              </li>
-              <li>
-                User1
-              </li>
-              <li>
-                User1
-              </li>
-              <li>
-                User1
-              </li>
-  
+            {registeredUsers.map((item, idx)=>(
+
+            <li key ={item}>
+              <Link >
+                {item}
+              </Link>
+            </li>
+
+          ))}
+
               
-            </ul>            
+            </ul>
           </div>
 
           
@@ -226,7 +228,13 @@ export default function Chat(){
             </div>
 
             <div className="MessagesArea">
-              messageArea
+              {
+                messages.map((item,idx)=>(
+                  <li key={idx}>
+                    {item}
+                  </li>
+                ))
+              }
             </div>
 
             <div className="FooterChat">

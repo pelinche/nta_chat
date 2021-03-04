@@ -42,3 +42,20 @@
   background-color: darkcyan;
   flex-basis: 60px;
 }
+
+.UsersList ul {
+  list-style: none;
+  padding: 0;
+}
+
+.UsersList li a {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  flex: 1;
+  padding: 10px;
+  margin-bottom: 0px;
+
+  text-decoration: none;
+  color: blue;
+}

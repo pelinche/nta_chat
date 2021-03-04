@@ -2,7 +2,6 @@ import {useState} from 'react';
 import {  useHistory } from 'react-router-dom';
 
 import axios from 'axios';
-import Login from './Login';
 const baseurl = 'http://177.125.244.8:5280/api';
 
 export default function Admin(){
