@@ -5,8 +5,8 @@ const { client, xml } = require('@xmpp/client');
 const debug = require('@xmpp/debug');
 
 
-const URL = 'ws://127.0.0.1:5280/websocket';
-//const URL = 'ws://177.125.244.8:5280/websocket';
+//const URL = 'ws://127.0.0.1:5280/websocket';
+const URL = 'ws://177.125.244.8:5280/websocket';
 //const URL = 'wss://xmpp.beta.sip2sip.net:443/ws';
 const DOMAIN = 'localhost';
 

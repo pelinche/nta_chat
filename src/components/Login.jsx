@@ -1,8 +1,8 @@
 import {useState} from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import './Login.css';
-const URL = 'ws://127.0.0.1:5280/websocket';
-//const URL = 'ws://177.125.244.8:5280/websocket';
+//const URL = 'ws://127.0.0.1:5280/websocket';
+const URL = 'ws://177.125.244.8:5280/websocket';
 //const URL = 'wss://xmpp.beta.sip2sip.net:443/ws';
 const DOMAIN = 'localhost';
 
@@ -24,8 +24,8 @@ export default function Login() {
   const history = useHistory();
 
 
-  const [userName, setUserName] = useState('admin');
-  const [password, setPassword] = useState('password');
+  const [userName, setUserName] = useState('');
+  const [password, setPassword] = useState('');
   const [messageLogin, setMessageLogin] = useState('');
   const [connected, setConnected] = useState(false);
   //const [clientXmpp, setclientXmpp] = useState();

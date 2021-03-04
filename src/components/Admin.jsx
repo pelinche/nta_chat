@@ -1,8 +1,14 @@
 import {useState} from 'react';
+import {  useHistory } from 'react-router-dom';
+
 import axios from 'axios';
+import Login from './Login';
 const baseurl = 'http://177.125.244.8:5280/api';
 
 export default function Admin(){
+  
+  const history = useHistory();
+
   const [serverStatus, setServerStatus] = useState("");
   const [connectedUsers, setConnectedUsers] = useState([]);
   const [user_Username, setUser_Username] = useState('');
@@ -133,17 +139,19 @@ export default function Admin(){
       setEditingUser(false);
 
     }
-    
-    
+
 
   }
   
-
+  const loginScreen = () => {
+    history.push('/login');
+  }
 
 
   return(
     <>
-      <h1>Admin</h1>
+      <h1>Admin Area</h1>
+      <button onClick={()=> loginScreen()}>Chat Login</button>
       <button onClick={()=> statusServer()}>Get Server Status</button>
       <button onClick={()=>getConnectedUsers()}>Conected Users</button>
       <button onClick={()=>getRegisteredUsers()}>Registered Users</button>
@@ -176,13 +184,14 @@ export default function Admin(){
         
 
       <div>
-        <h2>Lista de Usuários</h2>
+        <h2>Users List</h2>
         <ul>
           {registeredUsers.map((item, idx)=>(
             <li key ={idx}>
               {item}
-              {item !== "admin"? <button onClick={()=>  deleteUser({item})} >Delete</button> : ''}
-              <button onClick={()=>editUser({item})} >Edit</button>
+              {item !== "admin"? <button onClick={()=>  deleteUser({item})} >Delete</button> :''}
+              {item !== "admin"? <button onClick={()=>editUser({item})} >Edit</button>:''}
+              
             </li>
 
           ))}
