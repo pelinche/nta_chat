@@ -4,3 +4,7 @@
   border-radius: 5px;
   overflow: hidden;
 }
+
+.LinkArea a {
+  color: white;
+}

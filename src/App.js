@@ -9,6 +9,7 @@ import {
   Redirect,
   useLocation,
 } from 'react-router-dom';
+import Admin from './components/Admin';
 
 function App() {
   let location = useLocation();
@@ -26,6 +27,9 @@ function App() {
               <Switch>
                 <Route path="/login">
                   <Login />
+                </Route>
+                <Route path="/admin">
+                  <Admin />
                 </Route>
                 <SecureRoute path="/chat">
                   <Chat />

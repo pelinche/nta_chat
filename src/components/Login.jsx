@@ -1,9 +1,8 @@
 import {useState} from 'react';
 import { Link, useHistory } from 'react-router-dom';
-
 import './Login.css';
-//const URL = 'ws://127.0.0.1:5280/websocket';
-const URL = 'ws://177.125.244.8:5280/websocket';
+const URL = 'ws://127.0.0.1:5280/websocket';
+//const URL = 'ws://177.125.244.8:5280/websocket';
 //const URL = 'wss://xmpp.beta.sip2sip.net:443/ws';
 const DOMAIN = 'localhost';
 
@@ -49,7 +48,7 @@ export default function Login() {
   const doConnection = () =>{
 
     if(clientXmpp.status !== 'online'){
-      console.log('Here');
+      
       clientXmpp = client({
         service: URL,
         domain: DOMAIN,
@@ -66,7 +65,7 @@ export default function Login() {
       });
 
       clientXmpp.on("status", (status) => {
-        console.debug(status);
+        //console.debug(status);
         if(status === "online"){
           clientXmpp.stop();
           //direct to chat page
@@ -114,6 +113,10 @@ export default function Login() {
         }>Login</button>
         </div>
         <span>{messageLogin}</span>
+        <div className="LinkArea">
+          <Link to="/admin">Admin Area</Link>
+        </div>
+        
 
       </div>
     )
