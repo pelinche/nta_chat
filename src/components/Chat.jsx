@@ -1,5 +1,5 @@
 import './Chat.css';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import axios from 'axios';
 
@@ -16,6 +16,20 @@ const URL = 'ws://177.125.244.8:5280/websocket';
 const DOMAIN = 'localhost';
 
 
+class objMsg{
+  constructor(fromto, direction, datetime, message){
+    this.fromto = fromto;
+    this.direction = direction;
+    this.datetime = datetime;
+    this.message = message;
+  }
+}
+
+
+
+
+
+
 
 export default function Chat(){
   const history = useHistory();
@@ -24,9 +38,12 @@ export default function Chat(){
   const [userName, setUserName] = useState(localStorage.getItem('username'));
   const [password, setPassword] = useState(localStorage.getItem('password'));
   const [xmppStatus, setXmppStatus] = useState('Offline');
-  const [messages, setMessages] = useState([])
+  const [messages, setMessages] = useState([]);
+  const [chat, setChat] = useState('');
+  const [filteredMessages, setFilteredMessages] = useState([]);
 
   const [registeredUsers,setRegisteredUsers] = useState([]);
+  
   
 
   const [clientXmpp, setClientXmpp] = useState(
@@ -40,6 +57,11 @@ export default function Chat(){
     })
   );
 
+
+
+  useEffect(() => {
+    console.log("Changed User",chat);
+  }, [chat])
 
 
 
@@ -90,16 +112,6 @@ export default function Chat(){
   const doConnection = () =>{
 
     if(clientXmpp.status !== 'online'){
-      /*
-      setClientXmpp(client({
-        service: URL,
-        domain: DOMAIN,
-        resource: 'WebApp',
-        username: userName,
-        password: password,
-        transport: 'websocket',
-      }));
-      */
       debug(clientXmpp, false);
       clientXmpp.start().catch((error) => {
         console.log('*Erro', error);
@@ -109,9 +121,6 @@ export default function Chat(){
     }else{
       console.log('Já está online');
     }
-
-
-
   }
 
   const disconnect = async () => {
@@ -140,23 +149,17 @@ export default function Chat(){
 
     clientXmpp.on('stanza', (stanza) => {
       if (stanza.is('message')) {
-        //setMessasges([messages , stanza]);
-        console.log('Message from: ' + stanza.attrs.from);
-        console.log('Message To: ' + stanza.attrs.to);
-        //console.log("Message ? ",stanza.children.attrs[0]);
-        
+        addLog(stanza);
+        let messageReceived = stanza.children[0].children[0];
+
+        if(messageReceived === "Offline storage"){
+          messageReceived = stanza.children[1].children[0]
+
+        }
 
 
-
-
-        setMessages(oldarray => [...oldarray,msgreceived])
-
-        let msgreceived = '' + stanza.getChild('body');
-        //        setMessasges([messages, msgreceived]);
-        //console.log("msgreceived:",msgreceived);
-        addLog("Received: "+msgreceived);
-
-        console.log('Received: ', stanza);
+        const obj =  new objMsg(stanza.attrs.from,'R','datetime',messageReceived);
+        setMessages(oldarray => [...oldarray,obj ])
       } else {
         //console.log('Other: ',stanza);
       }
@@ -210,7 +213,7 @@ export default function Chat(){
             {registeredUsers.map((item, idx)=>(
 
             <li key ={item}>
-              <Link >
+              <Link onClick={()=>setChat(item)}>
                 {item}
               </Link>
             </li>
@@ -227,22 +230,21 @@ export default function Chat(){
               Cabeçalho da conversa
             </div>
 
-            <div className="MessagesArea">
+            <aside className="MessagesArea">
+              <ul>
               {
                 messages.map((item,idx)=>(
                   <li key={idx}>
-                    {item}
+                    {item.fromto} - {item.message}
                   </li>
                 ))
               }
-            </div>
+              </ul>
+            </aside>
 
             <div className="FooterChat">
               footer
             </div>
-
-            
-            
           </div>
         </div>
       </div>

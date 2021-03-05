@@ -19,19 +19,16 @@ let clientXmpp = client({
 });
 
 
-
 export default function Login() {
   const history = useHistory();
+
 
 
   const [userName, setUserName] = useState('');
   const [password, setPassword] = useState('');
   const [messageLogin, setMessageLogin] = useState('');
   const [connected, setConnected] = useState(false);
-  //const [clientXmpp, setclientXmpp] = useState();
   
-
-
   const connect = () =>{
     setMessageLogin('Starting conection...');
     console.log('Username:'+userName);
@@ -90,9 +87,10 @@ export default function Login() {
 
 
     return(
+      
+
       <div className="Login">
         <h1>NTA Chat</h1>
-        
         <div>
         <label>Username</label>
         <input value={userName} onChange={ (e) =>{
@@ -108,8 +106,8 @@ export default function Login() {
         } />
         </div>
         <div>
-        <button onClick={
-          connect
+        <button onClick={()=>
+          connect()
         }>Login</button>
         </div>
         <span>{messageLogin}</span>
@@ -117,7 +115,6 @@ export default function Login() {
           <Link to="/admin">Admin Area</Link>
         </div>
         
-
       </div>
     )
 
