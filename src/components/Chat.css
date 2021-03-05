@@ -15,13 +15,23 @@
   flex-grow: 1;
 }
 
+.MenuArea {
+  background-color: chocolate;
+  display: flex;
+  flex-direction: column;
+}
+
+.MenuHeadArea {
+  background-color: deepskyblue;
+  text-align: left;
+}
+
 .UsersList {
   flex-basis: 250px;
   background-color: #dfe4ea;
   flex-grow: 1;
   position: relative;
   overflow-y: auto;
-  height: 90%;
 }
 
 .Body {
@@ -35,6 +45,7 @@
   background-color: #ff6f61;
   flex-basis: 60px;
   text-align: left;
+  font-size: 1.5rem;
 }
 
 .MessagesArea {

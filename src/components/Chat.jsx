@@ -281,30 +281,38 @@ export default function Chat(){
       <div className="Chat">
         <h3>NTA Chat by Luis Carlos Eich</h3>
         <div className="ChatArea">
-          <div className="UsersList">
-          <p>Username: {userName}</p>
-          <p>Status: {xmppStatus}</p>
-          <label>
-          <input
-            type="checkbox"
-            defaultChecked={soundNotification}
-            
-            onChange={()=>setSoundNotification(!soundNotification)}
-          />Sound Notification?
-          </label>
 
 
-          <button
-            onClick={() => {
-              disconnect();
-            }}
-          >
-            Logout
-          </button>
-            <h3>UserList</h3>
-            <h3>UserList</h3>
-            <h3>UserList</h3>
-            
+
+
+
+
+
+          <div className="MenuArea">
+            <div class="MenuHeadArea">
+              <p>Username: {userName}</p>
+              <p>Status: {xmppStatus}</p>
+              <label>
+              <input
+                type="checkbox"
+                defaultChecked={soundNotification}
+                
+                onChange={()=>setSoundNotification(!soundNotification)}
+              />Sound Notification?
+              </label>
+
+
+              <button
+                onClick={() => {
+                  disconnect();
+                }}
+              >
+                Logout
+              </button>
+              <h4>UserList</h4>
+
+            </div>
+            <div className="UsersList">
             <ul>
             {registeredUsers.map((item, idx)=>(
 
@@ -314,11 +322,12 @@ export default function Chat(){
               </Link>
             </li>
 
-
+              
           ))}
-
+ 
               
             </ul>
+            </div>
           </div>
 
           
