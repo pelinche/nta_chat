@@ -2,9 +2,14 @@ import './Chat.css';
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import axios from 'axios';
+import useSound from 'use-sound';
+import audioMsg from '../sounds/notification.mp3';
+
 
 const { client, xml } = require('@xmpp/client');
 const debug = require('@xmpp/debug');
+
+
 
 
 const baseurl = 'http://177.125.244.8:5280/api';
@@ -42,10 +47,16 @@ export default function Chat(){
   const [chat, setChat] = useState('');
   const [filteredMessages, setFilteredMessages] = useState([]);
   const [headerChat, setHeadeChat] = useState('Header Chat');
+  const [statusMessageSended, setStatusMessageSended] = useState('');
   const inputMessageToSend = useRef(null);
 
   const [registeredUsers,setRegisteredUsers] = useState([]);
   const [messageToSend,setMessageToSend] = useState('');
+
+  const [play] = useSound(audioMsg);
+  const [soundMessage,setSoundMessage] = useState(true);
+
+  
   
 
   const [clientXmpp, setClientXmpp] = useState(
@@ -63,9 +74,16 @@ export default function Chat(){
 
   useEffect(() => {
     console.log("Changed User",chat);
-    setHeadeChat(chat)
+    setHeadeChat(chat);
+    
+
 
   }, [chat])
+
+  useEffect(()=>{
+      playSound();
+    
+  },[soundMessage])
 
 
 
@@ -102,7 +120,7 @@ export default function Chat(){
     if(res.status === 200){
 
       let arrayresult = res.data.filter(name => {
-        return name !== 'luis';
+        return name !== userName;
     })
 
       setRegisteredUsers(arrayresult);
@@ -163,7 +181,14 @@ export default function Chat(){
         let msgFrom = stanza.attrs.from.split('/')[0];
         
         const obj =  new objMsg(msgFrom,'R','datetime',messageReceived);
-        setMessages(oldarray => [...oldarray,obj ])
+        setMessages(oldarray => [...oldarray,obj ]);
+        setSoundMessage(!soundMessage);
+
+        if(msgFrom !== chat){
+        }
+
+
+
       } else {
         //console.log('Other: ',stanza);
       }
@@ -186,6 +211,11 @@ export default function Chat(){
     });
   };
 
+  const playSound = () =>{
+    console.log('Play Sound');
+    play();
+  }
+
   const sendMessage = async () =>{
     if((messageToSend !== "") && (chat !== "")){
       console.log('Message sended');
@@ -202,10 +232,11 @@ export default function Chat(){
         const obj =  new objMsg(chat+'','S','datetime',messageToSend+"" );
         setMessages(oldarray => [...oldarray,obj ]);
         setMessageToSend('');
-        inputMessageToSend.current.focus();
+        
       } else {
         console.log('Offline');
       }
+      inputMessageToSend.current.focus();
 
     }
   }
@@ -216,13 +247,19 @@ export default function Chat(){
     setFirstAcess(false);
     xmppFunctions();
     connect();
-
   }
+
+  const keyPressIMessageToSend = (e)=>{
+    console.log(e);
+    if(e.key ==="Enter"){
+      sendMessage();
+    }
+  } 
 
   return(
     <>
       <div className="Chat">
-        <h3>Chat</h3>
+        <h3>NTA Chat by Luis Carlos Eich</h3>
         <div className="ChatArea">
           <div className="UsersList">
           <p>Username: {userName}</p>
@@ -242,9 +279,10 @@ export default function Chat(){
 
             <li key ={item}>
               <Link onClick={()=>setChat(item+'@'+DOMAIN)}>
-                {item}
+                {item+'@'+DOMAIN===chat? <strong>{item}</strong>:item}
               </Link>
             </li>
+
 
           ))}
 
@@ -274,8 +312,12 @@ export default function Chat(){
             </div>
 
             <div className="FooterChat">
-              <input type="text" ref={inputMessageToSend} className="text" value={messageToSend} onChange={(e)=> setMessageToSend(e.target.value) }  />
+              <input type="text" ref={inputMessageToSend} className="text" value={messageToSend} onChange={(e)=> setMessageToSend(e.target.value) } 
+              onKeyPress={(e)=> keyPressIMessageToSend(e)
+              } />
               <button onClick={() =>  sendMessage()}>Send Message</button>
+              <p>{statusMessageSended}</p>
+            
             </div>
           </div>
         </div>

@@ -17,7 +17,7 @@
 
 .UsersList {
   flex-basis: 250px;
-  background-color: bisque;
+  background-color: #dfe4ea;
   flex-grow: 1;
 }
 
@@ -29,13 +29,13 @@
 }
 
 .HeadArea {
-  background-color: darkmagenta;
+  background-color: #ff6f61;
   flex-basis: 60px;
   text-align: left;
 }
 
 .MessagesArea {
-  background-color: darkkhaki;
+  background-color: #92a8d1;
   flex-grow: 1;
   height: 1vh;
   position: relative;
@@ -43,7 +43,7 @@
 }
 
 .FooterChat {
-  background-color: darkcyan;
+  background-color: #a4b0be;
   flex-basis: 60px;
 }
 
