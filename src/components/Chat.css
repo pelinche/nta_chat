@@ -19,6 +19,9 @@
   flex-basis: 250px;
   background-color: #dfe4ea;
   flex-grow: 1;
+  position: relative;
+  overflow-y: auto;
+  height: 90%;
 }
 
 .Body {
@@ -57,7 +60,7 @@
   list-style: none;
   padding: 0;
   flex: 1;
-  padding: 10px;
+  padding: 5px;
   margin-bottom: 0px;
 
   text-decoration: none;

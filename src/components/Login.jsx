@@ -24,8 +24,8 @@ export default function Login() {
 
 
 
-  const [userName, setUserName] = useState('');
-  const [password, setPassword] = useState('');
+  const [userName, setUserName] = useState('luis');
+  const [password, setPassword] = useState('password');
   const [messageLogin, setMessageLogin] = useState('');
   const [connected, setConnected] = useState(false);
   

@@ -44,7 +44,7 @@ export default function Chat(){
   const [password, setPassword] = useState(localStorage.getItem('password'));
   const [xmppStatus, setXmppStatus] = useState('Offline');
   const [messages, setMessages] = useState([]);
-  const [chat, setChat] = useState('');
+  const [chatWith, setChatWith] = useState('');
   const [filteredMessages, setFilteredMessages] = useState([]);
   const [headerChat, setHeadeChat] = useState('Header Chat');
   const [statusMessageSended, setStatusMessageSended] = useState('');
@@ -54,8 +54,9 @@ export default function Chat(){
   const [messageToSend,setMessageToSend] = useState('');
 
   const [play] = useSound(audioMsg);
-  const [soundMessage,setSoundMessage] = useState(true);
-
+  const [soundMessage,setSoundMessage] = useState(0);
+  const [lastMessageReceivedFrom,setLastMessageReceivedFrom] = useState('');
+  const [soundNotification, setSoundNotification] = useState(true);
   
   
 
@@ -73,16 +74,18 @@ export default function Chat(){
 
 
   useEffect(() => {
-    console.log("Changed User",chat);
-    setHeadeChat(chat);
-    
-
-
-  }, [chat])
+    setHeadeChat(chatWith);
+  }, [chatWith])
 
   useEffect(()=>{
-      playSound();
-    
+
+
+    if(lastMessageReceivedFrom !==chatWith){
+//      if(soundMessage >0){
+      if(soundNotification){
+        playSound();
+      }
+    }
   },[soundMessage])
 
 
@@ -121,7 +124,7 @@ export default function Chat(){
 
       let arrayresult = res.data.filter(name => {
         return name !== userName;
-    })
+     })
 
       setRegisteredUsers(arrayresult);
     }else{
@@ -146,7 +149,7 @@ export default function Chat(){
   }
 
   const disconnect = async () => {
-    console.log(clientXmpp.status);
+//    console.log(clientXmpp.status);
     if (clientXmpp.status === 'online') {
     
       await clientXmpp.send(xml('presence', { type: 'unavailable' }));
@@ -164,6 +167,7 @@ export default function Chat(){
   }
 
   const xmppFunctions = () => {
+  
     clientXmpp.on('error', async (err) => {
       console.error('Error:', err);
       disconnect();
@@ -171,21 +175,26 @@ export default function Chat(){
 
     clientXmpp.on('stanza', (stanza) => {
       if (stanza.is('message')) {
-        addLog(stanza);
+        //addLog(stanza);
+        let msgFrom = stanza.attrs.from.split('/')[0];
         let messageReceived = stanza.children[0].children[0];
 
-        if(messageReceived === "Offline storage"){
-          messageReceived = stanza.children[1].children[0]
 
+
+
+        if(messageReceived === "Offline storage"){
+          messageReceived = (stanza.children[1].children[0])
+        }else{
+          setLastMessageReceivedFrom(msgFrom);
+        
+          setSoundMessage(soundMessage=> soundMessage + 1 );
         }
-        let msgFrom = stanza.attrs.from.split('/')[0];
+        
         
         const obj =  new objMsg(msgFrom,'R','datetime',messageReceived);
         setMessages(oldarray => [...oldarray,obj ]);
-        setSoundMessage(!soundMessage);
+        
 
-        if(msgFrom !== chat){
-        }
 
 
 
@@ -216,28 +225,40 @@ export default function Chat(){
     play();
   }
 
+
+
+
+
   const sendMessage = async () =>{
-    if((messageToSend !== "") && (chat !== "")){
-      console.log('Message sended');
+    if((messageToSend !== "") && (chatWith !== "")){
+      
       const message = xml(
         'message',
-        { type: 'chat', to: chat  },
+        { type: 'chat', to: chatWith  },
         xml('body', {}, messageToSend )
       );
-      console.log(message);
-
+      
       if (clientXmpp.status === 'online') {
         await clientXmpp.send(message);
         //setLogMessage(`${logMessage} ${message}`);
-        const obj =  new objMsg(chat+'','S','datetime',messageToSend+"" );
+        const obj =  new objMsg(chatWith+'','S','datetime',messageToSend+"" );
         setMessages(oldarray => [...oldarray,obj ]);
         setMessageToSend('');
-        
+        setStatusMessageSended('');  
       } else {
         console.log('Offline');
+        setStatusMessageSended('Chat offline');
       }
+      
       inputMessageToSend.current.focus();
 
+    }else{
+      if(chatWith === ""){
+        setStatusMessageSended('Please select user in a list');
+      }else if(messageToSend === ""){
+        setStatusMessageSended('Please inform a message to send.');
+      }
+      
     }
   }
 
@@ -249,8 +270,7 @@ export default function Chat(){
     connect();
   }
 
-  const keyPressIMessageToSend = (e)=>{
-    console.log(e);
+  const keyPressMessageToSend = (e)=>{
     if(e.key ==="Enter"){
       sendMessage();
     }
@@ -264,22 +284,33 @@ export default function Chat(){
           <div className="UsersList">
           <p>Username: {userName}</p>
           <p>Status: {xmppStatus}</p>
+          <label>
+          <input
+            type="checkbox"
+            defaultChecked={soundNotification}
+            
+            onChange={()=>setSoundNotification(!soundNotification)}
+          />Sound Notification?
+          </label>
+
 
           <button
             onClick={() => {
               disconnect();
             }}
           >
-            Disconnect
+            Logout
           </button>
+            <h3>UserList</h3>
+            <h3>UserList</h3>
             <h3>UserList</h3>
             
             <ul>
             {registeredUsers.map((item, idx)=>(
 
             <li key ={item}>
-              <Link onClick={()=>setChat(item+'@'+DOMAIN)}>
-                {item+'@'+DOMAIN===chat? <strong>{item}</strong>:item}
+              <Link onClick={()=>setChatWith(item+'@'+DOMAIN)}>
+                {item+'@'+DOMAIN===chatWith? <strong>{item}</strong>:item}
               </Link>
             </li>
 
@@ -300,7 +331,7 @@ export default function Chat(){
               
               {
                 messages.filter((item)=>{
-                  return item.fromto == chat;
+                  return item.fromto == chatWith;
                 })
                 .map((item,idx)=>(
                   <div key={idx} className={item.direction === 'S'? 'MessageSended' : 'MessageReceived' }>
@@ -313,10 +344,11 @@ export default function Chat(){
 
             <div className="FooterChat">
               <input type="text" ref={inputMessageToSend} className="text" value={messageToSend} onChange={(e)=> setMessageToSend(e.target.value) } 
-              onKeyPress={(e)=> keyPressIMessageToSend(e)
+              onKeyPress={(e)=> keyPressMessageToSend(e)
               } />
               <button onClick={() =>  sendMessage()}>Send Message</button>
               <p>{statusMessageSended}</p>
+
             
             </div>
           </div>
