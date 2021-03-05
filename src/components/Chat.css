@@ -31,11 +31,15 @@
 .HeadArea {
   background-color: darkmagenta;
   flex-basis: 60px;
+  text-align: left;
 }
 
 .MessagesArea {
   background-color: darkkhaki;
   flex-grow: 1;
+  height: 1vh;
+  position: relative;
+  overflow-y: auto;
 }
 
 .FooterChat {
@@ -58,4 +62,14 @@
 
   text-decoration: none;
   color: blue;
+}
+
+.MessageReceived {
+  background-color: white;
+  text-align: left;
+}
+
+.MessageSended {
+  background-color: aquamarine;
+  text-align: right;
 }

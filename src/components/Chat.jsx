@@ -1,5 +1,5 @@
 import './Chat.css';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import axios from 'axios';
 
@@ -41,9 +41,11 @@ export default function Chat(){
   const [messages, setMessages] = useState([]);
   const [chat, setChat] = useState('');
   const [filteredMessages, setFilteredMessages] = useState([]);
+  const [headerChat, setHeadeChat] = useState('Header Chat');
+  const inputMessageToSend = useRef(null);
 
   const [registeredUsers,setRegisteredUsers] = useState([]);
-  
+  const [messageToSend,setMessageToSend] = useState('');
   
 
   const [clientXmpp, setClientXmpp] = useState(
@@ -61,6 +63,8 @@ export default function Chat(){
 
   useEffect(() => {
     console.log("Changed User",chat);
+    setHeadeChat(chat)
+
   }, [chat])
 
 
@@ -156,9 +160,9 @@ export default function Chat(){
           messageReceived = stanza.children[1].children[0]
 
         }
-
-
-        const obj =  new objMsg(stanza.attrs.from,'R','datetime',messageReceived);
+        let msgFrom = stanza.attrs.from.split('/')[0];
+        
+        const obj =  new objMsg(msgFrom,'R','datetime',messageReceived);
         setMessages(oldarray => [...oldarray,obj ])
       } else {
         //console.log('Other: ',stanza);
@@ -181,6 +185,30 @@ export default function Chat(){
       setXmppStatus(status );
     });
   };
+
+  const sendMessage = async () =>{
+    if((messageToSend !== "") && (chat !== "")){
+      console.log('Message sended');
+      const message = xml(
+        'message',
+        { type: 'chat', to: chat  },
+        xml('body', {}, messageToSend )
+      );
+      console.log(message);
+
+      if (clientXmpp.status === 'online') {
+        await clientXmpp.send(message);
+        //setLogMessage(`${logMessage} ${message}`);
+        const obj =  new objMsg(chat+'','S','datetime',messageToSend+"" );
+        setMessages(oldarray => [...oldarray,obj ]);
+        setMessageToSend('');
+        inputMessageToSend.current.focus();
+      } else {
+        console.log('Offline');
+      }
+
+    }
+  }
 
 
 
@@ -213,7 +241,7 @@ export default function Chat(){
             {registeredUsers.map((item, idx)=>(
 
             <li key ={item}>
-              <Link onClick={()=>setChat(item)}>
+              <Link onClick={()=>setChat(item+'@'+DOMAIN)}>
                 {item}
               </Link>
             </li>
@@ -227,23 +255,27 @@ export default function Chat(){
           
           <div className="Body">
             <div className="HeadArea">
-              Cabeçalho da conversa
+              {headerChat}
             </div>
 
-            <aside className="MessagesArea">
-              <ul>
+            <div className="MessagesArea">
+              
               {
-                messages.map((item,idx)=>(
-                  <li key={idx}>
-                    {item.fromto} - {item.message}
-                  </li>
+                messages.filter((item)=>{
+                  return item.fromto == chat;
+                })
+                .map((item,idx)=>(
+                  <div key={idx} className={item.direction === 'S'? 'MessageSended' : 'MessageReceived' }>
+                    {item.message}
+                  </div>
                 ))
               }
-              </ul>
-            </aside>
+              
+            </div>
 
             <div className="FooterChat">
-              footer
+              <input type="text" ref={inputMessageToSend} className="text" value={messageToSend} onChange={(e)=> setMessageToSend(e.target.value) }  />
+              <button onClick={() =>  sendMessage()}>Send Message</button>
             </div>
           </div>
         </div>
