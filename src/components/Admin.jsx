@@ -18,6 +18,9 @@ export default function Admin(){
   const [editingUserName, setEditingUserName] = useState('');
   const [user_ChangePassword,setUser_ChangePassword] = useState('');
   const [msgEditing, setMsgEditing] = useState('');
+  const [chatRoomName,setChatRoomName] = useState('');
+  const [chatRooms, setChatRooms] = useState([]);
+  const [msgChatRoom, setMsgChatRoom] = useState('');
 
   const statusServer = async () =>{
     const res = await axios.post( baseurl+"/status", {}, {
@@ -136,15 +139,85 @@ export default function Admin(){
   const change_Password = () => {
     if(user_ChangePassword !== ""){
       setEditingUser(false);
-
     }
-
-
   }
   
+  
+  const getChatRooms = async () =>{
+    const res = await axios.post( baseurl+"/muc_online_rooms", {
+      "service": "conference.localhost"
+    }, {
+      auth: {
+        username: 'admin@localhost',
+        password: 'password'
+      }
+    });
+    if(res.status === 200){
+      console.log(res);
+      setChatRooms(res.data);
+    }else{
+      setChatRooms([]);
+    }
+    
+  }
+
+  
+  const addChatRoom = async() => {
+  const res = await axios.post( baseurl+"/create_room", {
+    
+    "name": chatRoomName,
+    "service": "conference.localhost",
+    "host": "localhost"
+  }, {
+    auth: {
+      username: 'admin@localhost',
+      password: 'password'
+    }
+  });
+  if(res.status === 200){
+    console.log(res);
+    setMsgChatRoom(res.data);
+    getChatRooms();
+    setChatRoomName('');
+  }else{
+    setMsgChatRoom("Fail: "+res.data);
+  }
+  
+}
+const deleteChatRoom = async(roomName) => {
+console.log(roomName.item);
+  const room = roomName.item.split('@');
+
+
+  const res = await axios.post( baseurl+"/destroy_room",{
+    "name": room[0],
+    "service": room[1] ,
+  }, {
+    auth: {
+      username: 'admin@localhost',
+      password: 'password'
+    }
+    
+  });
+  if(res.status === 200){
+    console.log(res);
+    setMsgChatRoom('Chatroom '+roomName.item+' Deleted');
+    getChatRooms();
+
+  }else{
+    setMsgChatRoom("Fail: "+res.data);
+    
+  }
+  
+  
+}
+
+
   const loginScreen = () => {
     history.push('/login');
   }
+
+
 
 
   return(
@@ -154,6 +227,7 @@ export default function Admin(){
       <button onClick={()=> statusServer()}>Get Server Status</button>
       <button onClick={()=>getConnectedUsers()}>Conected Users</button>
       <button onClick={()=>getRegisteredUsers()}>Registered Users</button>
+      <button onClick={()=>getChatRooms()}>Chat Rooms</button>
       <p>Server Status: {serverStatus}</p>
       <div>
         <label>Conected Users</label>
@@ -188,9 +262,8 @@ export default function Admin(){
           {registeredUsers.map((item, idx)=>(
             <li key ={idx}>
               {item}
-              {item !== "admin"? <button onClick={()=>  deleteUser({item})} >Delete</button> :''}
               {item !== "admin"? <button onClick={()=>editUser({item})} >Edit</button>:''}
-              
+              {item !== "admin"? <button onClick={()=>  deleteUser({item})} >Delete</button> :''}
             </li>
 
           ))}
@@ -201,14 +274,38 @@ export default function Admin(){
       <h3>Add User</h3>
       <div>
           <label>Username:</label>
-          <input value={user_Username} on onChange={(e)=>setUser_Username(e.target.value)}></input>
+          <input value={user_Username} onChange={(e)=>setUser_Username(e.target.value)}></input>
           <label>Password:</label>
-          <input value={user_Password} on onChange={(e)=>setUser_Password(e.target.value)}></input>
+          <input value={user_Password} onChange={(e)=>setUser_Password(e.target.value)}></input>
+          <button onClick={()=> addUser()}>Add User</button>
+          <div className="red">{msgUser}</div>
+
       </div>
-      <button onClick={()=> addUser()}>Add User</button>
-      <div className="red">{msgUser}</div>
+
+      <div>
+        <h2>Chatroom List</h2>
+        <ul>
+          {chatRooms.map((item, idx)=>(
+            <li key ={idx}>
+              {item}
+              <button onClick={()=>  deleteChatRoom({item})} >Delete</button>
+              
+            </li>
+
+          ))}
+        </ul>
+      </div>
+      <h3>Chat Room</h3>
+      <div>
+        <label>Chat room name:</label>
+        <input value={chatRoomName} onChange={(e)=>setChatRoomName(e.target.value)}></input>
+        <button onClick={()=>addChatRoom()}>Add ChatRoom </button>
+        <label>{msgChatRoom}</label>
       
+      </div>
+
 
     </>
+
   )
 }

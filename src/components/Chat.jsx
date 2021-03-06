@@ -4,6 +4,7 @@ import { Link, useHistory } from 'react-router-dom';
 import axios from 'axios';
 import useSound from 'use-sound';
 import audioMsg from '../sounds/notification.mp3';
+import { MessageType } from 'stanza/Constants';
 
 
 const { client, xml } = require('@xmpp/client');
@@ -22,11 +23,13 @@ const DOMAIN = 'localhost';
 
 
 class objMsg{
-  constructor(fromto, direction, datetime, message){
+  constructor(fromto, direction, datetime, message, type, from){
     this.fromto = fromto;
     this.direction = direction;
     this.datetime = datetime;
     this.message = message;
+    this.messagetype = type;
+    this.from = from;
   }
 }
 
@@ -57,6 +60,8 @@ export default function Chat(){
   const [soundMessage,setSoundMessage] = useState(0);
   const [lastMessageReceivedFrom,setLastMessageReceivedFrom] = useState('');
   const [soundNotification, setSoundNotification] = useState(true);
+  const [chatRooms,setChatRooms] = useState([]);
+  const [chatType, setChatType] = useState('');
   
   
 
@@ -76,6 +81,19 @@ export default function Chat(){
   useEffect(() => {
     setHeadeChat(chatWith);
   }, [chatWith])
+
+
+  useEffect(()=>{
+    
+    
+    
+    chatRooms.map((item, idx)=>{
+      console.log("Subs",idx,item);
+      subscribeRoom(item);
+      }
+    )
+  },[chatRooms])
+
 
   useEffect(()=>{
 
@@ -101,6 +119,7 @@ export default function Chat(){
       
       //get list of users...
       getRegisteredUsers();
+      getChatRooms();
 
 
       doConnection();
@@ -133,6 +152,50 @@ export default function Chat(){
     
   }
 
+  const getChatRooms = async () =>{
+    const res = await axios.post( baseurl+"/muc_online_rooms", {
+      "service": "conference.localhost"
+    }, {
+      auth: {
+        username: 'admin@localhost',
+        password: 'password'
+      }
+    });
+    if(res.status === 200){
+      console.log("MucOnlineRooms",res);
+      setChatRooms(res.data);
+    }else{
+      setChatRooms([]);
+    }
+    
+  }
+
+  // "user": userName+'@'+DOMAIN,
+  // "nick": userName,
+  // "room": roomName,
+
+
+  const subscribeRoom = async (roomName) =>{
+    console.log(roomName);
+    const res = await axios.post( baseurl+"/subscribe_room", {
+      "user": userName+'@'+DOMAIN,
+      "nick": userName,
+      "room": roomName,
+      "nodes": "urn:xmpp:mucsub:nodes:messages,urn:xmpp:mucsub:nodes:affiliations"
+    }, {
+      auth: {
+        username: 'admin@localhost',
+        password: 'password'
+      }
+    });
+    if(res.status === 200){
+      console.log(res);
+
+    }else{
+      console.log(res);
+    }
+    
+  }
 
   const doConnection = () =>{
 
@@ -174,24 +237,47 @@ export default function Chat(){
     });
 
     clientXmpp.on('stanza', (stanza) => {
+      
       if (stanza.is('message')) {
-        //addLog(stanza);
+        //console.log("R1: ",stanza);
+        
+        
         let msgFrom = stanza.attrs.from.split('/')[0];
+        let fromText = stanza.attrs.from.split('/')[1];
         let messageReceived = stanza.children[0].children[0];
+        let receivedChatType = "chat";
+        let direction = 'R';
 
-
-
-
-        if(messageReceived === "Offline storage"){
-          messageReceived = (stanza.children[1].children[0])
+        if((''+messageReceived).indexOf('type="groupchat"')<0){
+          if(messageReceived === "Offline storage"){
+            messageReceived = (stanza.children[1].children[0])
+          }else{
+            setLastMessageReceivedFrom(msgFrom);
+            setSoundMessage(soundMessage=> soundMessage + 1 );
+          }
         }else{
-          setLastMessageReceivedFrom(msgFrom);
-        
-          setSoundMessage(soundMessage=> soundMessage + 1 );
+          let chatGroupObject = stanza.children[0].children[0].children[0].children[0].attrs;
+          
+          fromText = chatGroupObject.from.split('/')[1];
+          console.log("chatGroupObj",chatGroupObject,fromText);
+          messageReceived = ''+messageReceived.children[0].children[0].children[0].children[0];
+          
+          //messageReceived = ''+messageReceived.children[0];
+          receivedChatType = 'groupchat';
+          console.log("From2:",fromText, userName);
+          if(fromText === userName){
+            direction = 'S';
+          }else{
+            setLastMessageReceivedFrom(msgFrom);
+            setSoundMessage(soundMessage=> soundMessage + 1 );            
+          }
+          
         }
+        console.log("Received:",messageReceived);
         
         
-        const obj =  new objMsg(msgFrom,'R','datetime',messageReceived);
+        const obj =  new objMsg(msgFrom,direction,'datetime',messageReceived,receivedChatType,fromText);
+        //console.log(obj);
         setMessages(oldarray => [...oldarray,obj ]);
         
 
@@ -215,7 +301,7 @@ export default function Chat(){
     */
 
     clientXmpp.on('status', (status) => {
-      console.debug('Status: ', status);
+      //console.debug('Status: ', status);
       setXmppStatus(status );
     });
   };
@@ -234,15 +320,17 @@ export default function Chat(){
       
       const message = xml(
         'message',
-        { type: 'chat', to: chatWith  },
+        { type: chatType , to: chatWith , from :userName +'@'+DOMAIN },
         xml('body', {}, messageToSend )
       );
       
       if (clientXmpp.status === 'online') {
         await clientXmpp.send(message);
         //setLogMessage(`${logMessage} ${message}`);
-        const obj =  new objMsg(chatWith+'','S','datetime',messageToSend+"" );
-        setMessages(oldarray => [...oldarray,obj ]);
+        if(chatType === "chat"){
+          const obj =  new objMsg(chatWith+'','S','datetime',messageToSend+"",chatType,userName);
+          setMessages(oldarray => [...oldarray,obj ]);
+        }
         setMessageToSend('');
         setStatusMessageSended('');  
       } else {
@@ -281,13 +369,6 @@ export default function Chat(){
       <div className="Chat">
         <h3>NTA Chat by Luis Carlos Eich</h3>
         <div className="ChatArea">
-
-
-
-
-
-
-
           <div className="MenuArea">
             <div class="MenuHeadArea">
               <p>Username: {userName}</p>
@@ -317,7 +398,10 @@ export default function Chat(){
             {registeredUsers.map((item, idx)=>(
 
             <li key ={item}>
-              <Link onClick={()=>setChatWith(item+'@'+DOMAIN)}>
+              <Link onClick={()=>{
+                  setChatWith(item+'@'+DOMAIN)
+                  setChatType('chat')
+                }}>
                 {item+'@'+DOMAIN===chatWith? <strong>{item}</strong>:item}
               </Link>
             </li>
@@ -327,7 +411,26 @@ export default function Chat(){
  
               
             </ul>
+
+            <ul>
+            {chatRooms.map((item, idx)=>(
+              <li key ={item}>
+                <Link onClick={()=>{
+                  setChatWith(item);
+                  setChatType('groupchat');
+                }}>
+                  {item===chatWith? <strong>{item}</strong>:item}
+                </Link>
+              </li>
+            ))}
+ 
+              
+            </ul>
+
+
             </div>
+
+
           </div>
 
           
@@ -344,7 +447,9 @@ export default function Chat(){
                 })
                 .map((item,idx)=>(
                   <div key={idx} className={item.direction === 'S'? 'MessageSended' : 'MessageReceived' }>
+                    {item.from}:
                     {item.message}
+                    
                   </div>
                 ))
               }

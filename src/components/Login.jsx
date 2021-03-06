@@ -100,7 +100,7 @@ export default function Login() {
         </div>
         <div>
         <label>Password</label>
-        <input value={password} onChange={ (e) =>{
+        <input type="password" value={password} onChange={ (e) =>{
             setPassword(e.target.value);
           }
         } />

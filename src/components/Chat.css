@@ -24,6 +24,7 @@
 .MenuHeadArea {
   background-color: deepskyblue;
   text-align: left;
+  line-height: 0.5;
 }
 
 .UsersList {
@@ -32,6 +33,7 @@
   flex-grow: 1;
   position: relative;
   overflow-y: auto;
+  line-height: 0.7;
 }
 
 .Body {
