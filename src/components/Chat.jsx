@@ -41,6 +41,13 @@ class objUser{
   }
 }
 
+class objRoom{
+  constructor(room, newMessages, numberMessages){
+    this.room = room;
+    this.newmessages = newMessages;
+    this.numberMessages = numberMessages;
+  }
+}
 
 
 
@@ -67,6 +74,7 @@ export default function Chat(){
   const [soundNotification, setSoundNotification] = useState(true);
   const [chatRooms,setChatRooms] = useState([]);
   const [chatType, setChatType] = useState('');
+  const [subscribeRooms, setSubscribeRooms] = useState(true); 
   
   
 
@@ -90,19 +98,31 @@ export default function Chat(){
 
 
   const notifyUser = (user,notify,quantity) =>{
-    console.log("Last message received from",lastMessageReceivedFrom);
-    console.log(registeredUsers);
+
     let newArray = [];
     for (let key in registeredUsers) {
       let obj = registeredUsers[key];
       if(obj.user+"@"+DOMAIN === user){
         obj = new objUser(obj.user,notify,quantity);
       }
-      console.log(obj);
       newArray.push(obj);
    }
-   console.log(newArray);
    setRegisteredUsers(newArray);
+
+
+   let newArrayRoom = [];
+   
+   for (let key in chatRooms) {
+     let obj = chatRooms[key];
+     if(obj.room === user){
+       obj = new objRoom(obj.room,notify,quantity);
+     }
+     newArrayRoom.push(obj);
+  }
+  
+  setChatRooms(newArrayRoom);
+
+
    
   }
   
@@ -121,12 +141,14 @@ export default function Chat(){
 
 
   useEffect(()=>{
-    
-    chatRooms.map((item, idx)=>{
-//      console.log("Subs",idx,item);
-      subscribeRoom(item);
-      }
-    )
+    if(subscribeRooms){
+      setSubscribeRooms(false);
+      chatRooms.map((item, idx)=>{
+        console.log("Subs",idx,item);
+        subscribeRoom(item.room);
+        }
+      )
+    }
   },[chatRooms])
 
 
@@ -204,7 +226,17 @@ export default function Chat(){
     });
     if(res.status === 200){
       //console.log("MucOnlineRooms",res);
-      setChatRooms(res.data);
+
+     let resArray = [];
+     for (let i in res.data) {
+       
+       let obj = new objRoom(res.data[i],false,0);
+       resArray.push(obj);
+       
+     }
+     setChatRooms(resArray);
+
+
     }else{
       setChatRooms([]);
     }
@@ -285,10 +317,13 @@ export default function Chat(){
         let direction = 'R';
 
         if((''+messageReceived).indexOf('type="groupchat"')<0){
+
+          setLastMessageReceivedFrom(msgFrom);
+
           if(messageReceived === "Offline storage"){
             messageReceived = (stanza.children[1].children[0])
           }else{
-            setLastMessageReceivedFrom(msgFrom);
+            
             setSoundMessage(soundMessage=> soundMessage + 1 );
             if(chatWith !== msgFrom){
 //              notifyUser(msgFrom,true,10);
@@ -431,6 +466,7 @@ export default function Chat(){
                     setChatWith(item.user+'@'+DOMAIN);
                     setChatType('chat');
                     notifyUser(item.user+'@'+DOMAIN,false,0);
+                    inputMessageToSend.current.focus();
                   }}>
                   
                   {item.user+'@'+DOMAIN===chatWith? <strong>{item.user}</strong>:item.user}
@@ -446,12 +482,17 @@ export default function Chat(){
 
             <ul>
             {chatRooms.map((item, idx)=>(
-              <li key ={item}>
+              <li key ={item.room}>
                 <Link onClick={()=>{
-                  setChatWith(item);
+                  setChatWith(item.room);
                   setChatType('groupchat');
+                  notifyUser(item.room,false,0);
+                  inputMessageToSend.current.focus();
                 }}>
-                  {item===chatWith? <strong>{item}</strong>:item}
+                  {item.room===chatWith? <strong>{item.room.split("@")[0]}</strong>:item.room.split("@")[0]}
+                  {item.newmessages ? " * ":""}
+
+                  
                 </Link>
               </li>
             ))}
