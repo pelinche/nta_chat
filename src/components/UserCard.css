@@ -23,3 +23,15 @@
   padding: 10px;
   text-align: right;
 }
+
+.available {
+  color: green;
+  background-color: green;
+  border-radius: 50%;
+}
+
+.unavailable {
+  color: red;
+  background-color: red;
+  border-radius: 50%;
+}

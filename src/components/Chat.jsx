@@ -34,10 +34,11 @@ class objMsg{
 }
 
 class objUser{
-  constructor(user, newMessages, numberMessages){
+  constructor(user, newMessages, numberMessages,userStatus){
     this.user = user;
     this.newmessages = newMessages;
     this.numberMessages = numberMessages;
+    this.userStatus = userStatus;
   }
 }
 
@@ -75,7 +76,7 @@ export default function Chat(){
   const [chatRooms,setChatRooms] = useState([]);
   const [chatType, setChatType] = useState('');
   const [subscribeRooms, setSubscribeRooms] = useState(true); 
-  
+  const [contReceivedOthers, setContReceivedOthers] = useState(0);
   
 
   const [clientXmpp, setClientXmpp] = useState(
@@ -89,13 +90,9 @@ export default function Chat(){
     })
   );
 
-
-
   useEffect(() => {
     setHeadeChat(chatWith);
   }, [chatWith])
-
-
 
   const notifyUser = (user,notify,quantity) =>{
 
@@ -103,7 +100,7 @@ export default function Chat(){
     for (let key in registeredUsers) {
       let obj = registeredUsers[key];
       if(obj.user+"@"+DOMAIN === user){
-        obj = new objUser(obj.user,notify,quantity);
+        obj = new objUser(obj.user,notify,quantity,obj.userStatus);
       }
       newArray.push(obj);
    }
@@ -112,18 +109,16 @@ export default function Chat(){
 
    let newArrayRoom = [];
    
-   for (let key in chatRooms) {
-     let obj = chatRooms[key];
-     if(obj.room === user){
-       obj = new objRoom(obj.room,notify,quantity);
-     }
-     newArrayRoom.push(obj);
-  }
+    for (let key in chatRooms) {
+      let obj = chatRooms[key];
+      if(obj.room === user){
+        obj = new objRoom(obj.room,notify,quantity);
+      }
+      newArrayRoom.push(obj);
+    }
   
-  setChatRooms(newArrayRoom);
+    setChatRooms(newArrayRoom);
 
-
-   
   }
   
   useEffect(()=>{
@@ -176,8 +171,44 @@ export default function Chat(){
   }
 
 
-  const getRegisteredUsers = async () =>{
+  const getUserStatus = async(username) => {
+    const res = await axios.post( baseurl+"/get_presence", {
+      "user": username,
+      "host" : DOMAIN
+    }, {
+      auth: {
+        username: 'admin@localhost',
+        password: 'password'
+      }
+    });
+    if(res.status === 200){
+      return res.data.show;
+    }
+    return "unavailable";
+  }
 
+  useEffect(()=>{
+    userStatus();
+  },[contReceivedOthers])
+
+  const userStatus = async () =>{
+    if(registeredUsers.length > 0){
+    let newArray = [];
+    for (let key in registeredUsers) {
+      let obj = registeredUsers[key];
+      let userStatus = await getUserStatus(obj.user);
+      if(userStatus !== obj.userStatus){
+        obj = new objUser(obj.user,obj.notify,obj.quantity,userStatus);
+      }
+      newArray.push(obj);
+    }
+    setRegisteredUsers(newArray);
+    }
+  }
+
+
+  const getRegisteredUsers = async () =>{
+    
     const res = await axios.post( baseurl+"/registered_users", {
       "host": "localhost"
     }, {
@@ -195,7 +226,7 @@ export default function Chat(){
      let resArray = [];
      for (let i in arrayresult) {
        
-       let obj = new objUser(arrayresult[i],false,0);
+       let obj = new objUser(arrayresult[i],false,0,"");
        resArray.push(obj);
        
      }
@@ -337,13 +368,14 @@ export default function Chat(){
           }
           
         }
-        
+        setContReceivedOthers(value => value +1);
         const obj =  new objMsg(msgFrom,direction,'datetime',messageReceived,receivedChatType,fromText);
         
         setMessages(oldarray => [...oldarray,obj ]);
         
       } else {
         //console.log('Other: ',stanza);
+        
       }
     });
 
@@ -416,13 +448,16 @@ export default function Chat(){
     }
   } 
 
+  
+  
+
   return(
     <>
       <div className="Chat">
         <h3>NTA Chat by Luis Carlos Eich</h3>
         <div className="ChatArea">
           <div className="MenuArea">
-            <div class="MenuHeadArea">
+            <div className="MenuHeadArea">
               <p>Username: {userName}</p>
               <p>Status: {xmppStatus}</p>
               <label>
@@ -457,9 +492,14 @@ export default function Chat(){
                     notifyUser(item.user+'@'+DOMAIN,false,0);
                     inputMessageToSend.current.focus();
                   }}>
-                  <UserCard title={item.user} color={item.user+'@'+DOMAIN===chatWith? "#8b8b8b":"#e7e7e7"}>
+                  <UserCard title={item.user} 
+                    color={item.user+'@'+DOMAIN===chatWith? "#8b8b8b":"#e7e7e7"}
+                    status={item.userStatus==="available"?item.userStatus:'unavailable'}
+                    statustext="-"
+                  >
                     
                     {item.newmessages ?  "Messages Unreaded" : "" }
+                    
                   </UserCard>
                   
                   
@@ -481,11 +521,12 @@ export default function Chat(){
                   notifyUser(item.room,false,0);
                   inputMessageToSend.current.focus();
                 }}>
-
+                  
                   <UserCard title={item.room.split("@")[0]} color={item.room===chatWith? "#8b8b8b":"#e7e7e7"}>
-                    
+
                     {item.newmessages ?  "Messages Unreaded" : "" }
-                  </UserCard>                  
+                    
+                  </UserCard>
 
                   
                 </Link>
@@ -550,6 +591,11 @@ export default function Chat(){
                 onClick={() =>  sendMessage()}
                 className="btn"
                 >Send Message</button>
+                <button 
+                onClick={() =>  userStatus()}
+                className="btn"
+                >User Status</button>
+
               <p>{statusMessageSended}</p>
 
             

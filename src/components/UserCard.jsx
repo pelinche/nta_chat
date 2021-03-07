@@ -8,7 +8,8 @@ export default (props) =>{
 
   return(
     <div className="UserCard" style={cardStyle}>
-      {props.title !== ""? <div className="Title">{props.title}</div>: "" }
+
+      {props.title !== ""? <div className="Title"><div className={props.status}>{props.statustext}</div> {props.title}</div>: "" }
       
       <div className="Content" style={cardStyle} >{props.children}</div>
       

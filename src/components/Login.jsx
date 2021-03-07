@@ -109,10 +109,10 @@ export default function Login() {
         }>Login</button>
         </div>
         <span>{messageLogin}</span>
-        <div className="LinkArea">
+{/*        <div className="LinkArea">
           <Link to="/admin">Admin Area</Link>
         </div>
-        
+      */}
       </div>
     )
 
