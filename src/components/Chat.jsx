@@ -189,9 +189,8 @@ export default function Chat(){
   }
 
   useEffect(()=>{
-    console.log("Parte1");
+
     if(Date.now() > timeChecked){
-      console.log("Parte 2: chamou aqui");
       setTimeChecked(Date.now() + 10000)
       userStatus();
 
