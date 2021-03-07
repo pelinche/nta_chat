@@ -5,7 +5,7 @@ import axios from 'axios';
 import useSound from 'use-sound';
 import audioMsg from '../sounds/notification.mp3';
 import Card from './Card';
-
+import UserCard from './UserCard';
 
 const { client, xml } = require('@xmpp/client');
 const debug = require('@xmpp/debug');
@@ -68,7 +68,7 @@ export default function Chat(){
   const [registeredUsers,setRegisteredUsers] = useState([]);
   const [messageToSend,setMessageToSend] = useState('');
 
-  const [play] = useSound(audioMsg);
+  const [playSound] = useSound(audioMsg);
   const [soundMessage,setSoundMessage] = useState(0);
   const [lastMessageReceivedFrom,setLastMessageReceivedFrom] = useState('');
   const [soundNotification, setSoundNotification] = useState(true);
@@ -128,7 +128,6 @@ export default function Chat(){
   
   useEffect(()=>{
     if(lastMessageReceivedFrom !== ""){
-      console.log("UE",chatWith, lastMessageReceivedFrom)
       if(chatWith !== lastMessageReceivedFrom){
         notifyUser(lastMessageReceivedFrom,true,0);
       }
@@ -138,9 +137,7 @@ export default function Chat(){
   },[lastMessageReceivedFrom])
     
   useEffect(()=>{
-    console.log(lastMessageReceivedFrom ,chatWith);
     if(lastMessageReceivedFrom !==chatWith){
-//      if(soundMessage >0){
       if(soundNotification){
         playSound();
       }
@@ -159,10 +156,6 @@ export default function Chat(){
       )
     }
   },[chatRooms])
-
-
-
-
 
 
   const connect = () =>{
@@ -371,12 +364,6 @@ export default function Chat(){
     });
   };
 
-  const playSound = () =>{
-    console.log('Play Sound');
-    play();
-  }
-
-
 
 
 
@@ -455,7 +442,7 @@ export default function Chat(){
               >
                 Logout
               </button>
-              <h4>UserList</h4>
+              <h3>Contacts and Rooms</h3>
 
             </div>
             <div className="UsersList">
@@ -465,13 +452,17 @@ export default function Chat(){
               <li key ={item.user}>
                 <Link onClick={()=>{
                     setChatWith(item.user+'@'+DOMAIN);
+                    setLastMessageReceivedFrom("");
                     setChatType('chat');
                     notifyUser(item.user+'@'+DOMAIN,false,0);
                     inputMessageToSend.current.focus();
                   }}>
+                  <UserCard title={item.user} color={item.user+'@'+DOMAIN===chatWith? "#8b8b8b":"#e7e7e7"}>
+                    
+                    {item.newmessages ?  "Messages Unreaded" : "" }
+                  </UserCard>
                   
-                  {item.user+'@'+DOMAIN===chatWith? <strong>{item.user}</strong>:item.user}
-                  {item.newmessages ?  " *" : "" }
+                  
                 </Link>
               </li>
 
@@ -490,13 +481,19 @@ export default function Chat(){
                   notifyUser(item.room,false,0);
                   inputMessageToSend.current.focus();
                 }}>
-                  {item.room===chatWith? <strong>{item.room.split("@")[0]}</strong>:item.room.split("@")[0]}
-                  {item.newmessages ? " * ":""}
+
+                  <UserCard title={item.room.split("@")[0]} color={item.room===chatWith? "#8b8b8b":"#e7e7e7"}>
+                    
+                    {item.newmessages ?  "Messages Unreaded" : "" }
+                  </UserCard>                  
 
                   
                 </Link>
               </li>
+              
+
             ))}
+
  
               
             </ul>
@@ -539,10 +536,20 @@ export default function Chat(){
             </div>
 
             <div className="FooterChat">
-              <input type="text" ref={inputMessageToSend} className="text" value={messageToSend} onChange={(e)=> setMessageToSend(e.target.value) } 
-              onKeyPress={(e)=> keyPressMessageToSend(e)
+              <input 
+                type="text" 
+                ref={inputMessageToSend} 
+                className="text" 
+                value={messageToSend} 
+                onChange={(e)=> setMessageToSend(e.target.value) }
+                className="input"
+                onKeyPress={(e)=> keyPressMessageToSend(e)
               } />
-              <button onClick={() =>  sendMessage()}>Send Message</button>
+              
+              <button 
+                onClick={() =>  sendMessage()}
+                className="btn"
+                >Send Message</button>
               <p>{statusMessageSended}</p>
 
             

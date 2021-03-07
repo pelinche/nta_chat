@@ -61,7 +61,18 @@
 
 .FooterChat {
   background-color: #a4b0be;
-  flex-basis: 60px;
+  flex-basis: 40px;
+  display: flex;
+  padding: 5px;
+}
+
+.FooterChat .input {
+  font-size: 1.2rem;
+  width: 100%;
+}
+
+.FooterChat .btn {
+  font-size: 1rem;
 }
 
 .UsersList ul {
@@ -74,7 +85,7 @@
   list-style: none;
   padding: 0;
   flex: 1;
-  padding: 5px;
+
   margin-bottom: 0px;
 
   text-decoration: none;

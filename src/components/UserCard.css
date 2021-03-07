@@ -1,0 +1,25 @@
+.UserCard {
+  border: 1px solid;
+  overflow: hidden;
+  margin: 0px;
+  display: flex;
+  flex-direction: column;
+  font-size: 1.2rem;
+  width: 100%;
+  min-height: 25px;
+}
+
+.UserCard .Title {
+  padding: 3px 3px;
+  display: flex;
+  justify-content: left;
+  text-transform: capitalize;
+}
+
+.UserCard .Content {
+  flex-grow: 1;
+  color: red;
+  font-style: italic;
+  padding: 10px;
+  text-align: right;
+}
