@@ -132,11 +132,20 @@ export default function Chat(){
       if(chatWith !== lastMessageReceivedFrom){
         notifyUser(lastMessageReceivedFrom,true,0);
       }
-    setLastMessageReceivedFrom("");
+    //setLastMessageReceivedFrom("_");
     }
 
   },[lastMessageReceivedFrom])
     
+  useEffect(()=>{
+    console.log(lastMessageReceivedFrom ,chatWith);
+    if(lastMessageReceivedFrom !==chatWith){
+//      if(soundMessage >0){
+      if(soundNotification){
+        playSound();
+      }
+    }
+  },[soundMessage])
 
 
 
@@ -152,14 +161,6 @@ export default function Chat(){
   },[chatRooms])
 
 
-  useEffect(()=>{
-    if(lastMessageReceivedFrom !==chatWith){
-//      if(soundMessage >0){
-      if(soundNotification){
-        playSound();
-      }
-    }
-  },[soundMessage])
 
 
 
