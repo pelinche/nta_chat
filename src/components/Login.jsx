@@ -31,8 +31,6 @@ export default function Login() {
   
   const connect = () =>{
     setMessageLogin('Starting conection...');
-    console.log('Username:'+userName);
-    console.log('Password:'+password);
     if(userName === "" || password === ""){
       setMessageLogin('Username and password are required.');
     }else{ 

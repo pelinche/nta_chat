@@ -1,0 +1,38 @@
+.Card {
+  border: 1px solid;
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 5px;
+  display: flex;
+  flex-direction: column;
+  min-width: 50px;
+  max-width: 70vw;
+}
+
+.Card .TitleSended {
+  padding: 0px 0px;
+  display: flex;
+  justify-content: right;
+  font-size: 0.8rem;
+}
+
+.Card .TitleReceived {
+  padding: 0px 0px;
+  display: flex;
+  justify-content: left;
+  font-size: 0.8rem;
+}
+
+.Card .ContentReceived {
+  flex-grow: 1;
+  color: #000;
+  padding: 10px;
+  text-align: left;
+}
+
+.Card .ContentSended {
+  flex-grow: 1;
+  color: #000;
+  padding: 10px;
+  text-align: right;
+}

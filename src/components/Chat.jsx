@@ -4,7 +4,7 @@ import { Link, useHistory } from 'react-router-dom';
 import axios from 'axios';
 import useSound from 'use-sound';
 import audioMsg from '../sounds/notification.mp3';
-import { MessageType } from 'stanza/Constants';
+import Card from './Card';
 
 
 const { client, xml } = require('@xmpp/client');
@@ -33,7 +33,13 @@ class objMsg{
   }
 }
 
-
+class objUser{
+  constructor(user, newMessages, numberMessages){
+    this.user = user;
+    this.newmessages = newMessages;
+    this.numberMessages = numberMessages;
+  }
+}
 
 
 
@@ -48,7 +54,6 @@ export default function Chat(){
   const [xmppStatus, setXmppStatus] = useState('Offline');
   const [messages, setMessages] = useState([]);
   const [chatWith, setChatWith] = useState('');
-  const [filteredMessages, setFilteredMessages] = useState([]);
   const [headerChat, setHeadeChat] = useState('Header Chat');
   const [statusMessageSended, setStatusMessageSended] = useState('');
   const inputMessageToSend = useRef(null);
@@ -83,12 +88,42 @@ export default function Chat(){
   }, [chatWith])
 
 
+
+  const notifyUser = (user,notify,quantity) =>{
+    console.log("Last message received from",lastMessageReceivedFrom);
+    console.log(registeredUsers);
+    let newArray = [];
+    for (let key in registeredUsers) {
+      let obj = registeredUsers[key];
+      if(obj.user+"@"+DOMAIN === user){
+        obj = new objUser(obj.user,notify,quantity);
+      }
+      console.log(obj);
+      newArray.push(obj);
+   }
+   console.log(newArray);
+   setRegisteredUsers(newArray);
+   
+  }
+  
+  useEffect(()=>{
+    if(lastMessageReceivedFrom !== ""){
+      console.log("UE",chatWith, lastMessageReceivedFrom)
+      if(chatWith !== lastMessageReceivedFrom){
+        notifyUser(lastMessageReceivedFrom,true,0);
+      }
+    setLastMessageReceivedFrom("");
+    }
+
+  },[lastMessageReceivedFrom])
+    
+
+
+
   useEffect(()=>{
     
-    
-    
     chatRooms.map((item, idx)=>{
-      console.log("Subs",idx,item);
+//      console.log("Subs",idx,item);
       subscribeRoom(item);
       }
     )
@@ -96,8 +131,6 @@ export default function Chat(){
 
 
   useEffect(()=>{
-
-
     if(lastMessageReceivedFrom !==chatWith){
 //      if(soundMessage >0){
       if(soundNotification){
@@ -120,8 +153,6 @@ export default function Chat(){
       //get list of users...
       getRegisteredUsers();
       getChatRooms();
-
-
       doConnection();
     }
 
@@ -145,7 +176,17 @@ export default function Chat(){
         return name !== userName;
      })
 
-      setRegisteredUsers(arrayresult);
+     let resArray = [];
+     for (let i in arrayresult) {
+       
+       let obj = new objUser(arrayresult[i],false,0);
+       resArray.push(obj);
+       
+     }
+     setRegisteredUsers(resArray);
+
+
+      
     }else{
       setRegisteredUsers([]);
     }
@@ -162,7 +203,7 @@ export default function Chat(){
       }
     });
     if(res.status === 200){
-      console.log("MucOnlineRooms",res);
+      //console.log("MucOnlineRooms",res);
       setChatRooms(res.data);
     }else{
       setChatRooms([]);
@@ -170,13 +211,8 @@ export default function Chat(){
     
   }
 
-  // "user": userName+'@'+DOMAIN,
-  // "nick": userName,
-  // "room": roomName,
-
-
   const subscribeRoom = async (roomName) =>{
-    console.log(roomName);
+    //console.log(roomName);
     const res = await axios.post( baseurl+"/subscribe_room", {
       "user": userName+'@'+DOMAIN,
       "nick": userName,
@@ -189,7 +225,7 @@ export default function Chat(){
       }
     });
     if(res.status === 200){
-      console.log(res);
+      //console.log(res);
 
     }else{
       console.log(res);
@@ -254,36 +290,29 @@ export default function Chat(){
           }else{
             setLastMessageReceivedFrom(msgFrom);
             setSoundMessage(soundMessage=> soundMessage + 1 );
+            if(chatWith !== msgFrom){
+//              notifyUser(msgFrom,true,10);
+            }
+            
           }
         }else{
           let chatGroupObject = stanza.children[0].children[0].children[0].children[0].attrs;
-          
           fromText = chatGroupObject.from.split('/')[1];
-          console.log("chatGroupObj",chatGroupObject,fromText);
           messageReceived = ''+messageReceived.children[0].children[0].children[0].children[0];
-          
-          //messageReceived = ''+messageReceived.children[0];
           receivedChatType = 'groupchat';
-          console.log("From2:",fromText, userName);
           if(fromText === userName){
             direction = 'S';
           }else{
             setLastMessageReceivedFrom(msgFrom);
-            setSoundMessage(soundMessage=> soundMessage + 1 );            
+            setSoundMessage(soundMessage=> soundMessage + 1 );
           }
           
         }
-        console.log("Received:",messageReceived);
-        
         
         const obj =  new objMsg(msgFrom,direction,'datetime',messageReceived,receivedChatType,fromText);
-        //console.log(obj);
+        
         setMessages(oldarray => [...oldarray,obj ]);
         
-
-
-
-
       } else {
         //console.log('Other: ',stanza);
       }
@@ -396,18 +425,21 @@ export default function Chat(){
             <div className="UsersList">
             <ul>
             {registeredUsers.map((item, idx)=>(
-
-            <li key ={item}>
-              <Link onClick={()=>{
-                  setChatWith(item+'@'+DOMAIN)
-                  setChatType('chat')
-                }}>
-                {item+'@'+DOMAIN===chatWith? <strong>{item}</strong>:item}
-              </Link>
-            </li>
+              
+              <li key ={item.user}>
+                <Link onClick={()=>{
+                    setChatWith(item.user+'@'+DOMAIN);
+                    setChatType('chat');
+                    notifyUser(item.user+'@'+DOMAIN,false,0);
+                  }}>
+                  
+                  {item.user+'@'+DOMAIN===chatWith? <strong>{item.user}</strong>:item.user}
+                  {item.newmessages ?  " *" : "" }
+                </Link>
+              </li>
 
               
-          ))}
+            ))}
  
               
             </ul>
@@ -446,11 +478,19 @@ export default function Chat(){
                   return item.fromto == chatWith;
                 })
                 .map((item,idx)=>(
-                  <div key={idx} className={item.direction === 'S'? 'MessageSended' : 'MessageReceived' }>
-                    {item.from}:
-                    {item.message}
+
+                  
+                  <Card title={item.messagetype === "groupchat"? item.from+" write " : ""}
+                    color={item.direction === "S"? "#67f88b" : "#d2d4d3"}
+                    direction={item.direction === "S"? "TitleSended":"TitleReceived"}
+                    contentDirection={item.direction === "S"? "ContentSended":"ContentReceived"}
+                  >
                     
-                  </div>
+                      
+                    {item.message}
+                  </Card>
+
+
                 ))
               }
               
