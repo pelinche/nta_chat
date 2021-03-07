@@ -77,6 +77,7 @@ export default function Chat(){
   const [chatType, setChatType] = useState('');
   const [subscribeRooms, setSubscribeRooms] = useState(true); 
   const [contReceivedOthers, setContReceivedOthers] = useState(0);
+  const [timeChecked, setTimeChecked] = useState(Date.now());
   
 
   const [clientXmpp, setClientXmpp] = useState(
@@ -188,7 +189,13 @@ export default function Chat(){
   }
 
   useEffect(()=>{
-    userStatus();
+    console.log("Parte1");
+    if(Date.now() > timeChecked){
+      console.log("Parte 2: chamou aqui");
+      setTimeChecked(Date.now() + 10000)
+      userStatus();
+
+    }
   },[contReceivedOthers])
 
   const userStatus = async () =>{
@@ -368,7 +375,7 @@ export default function Chat(){
           }
           
         }
-        setContReceivedOthers(value => value +1);
+        
         const obj =  new objMsg(msgFrom,direction,'datetime',messageReceived,receivedChatType,fromText);
         
         setMessages(oldarray => [...oldarray,obj ]);
@@ -377,6 +384,7 @@ export default function Chat(){
         //console.log('Other: ',stanza);
         
       }
+      setContReceivedOthers(value => value +1);
     });
 
     clientXmpp.on('online', (address) => {
@@ -498,7 +506,7 @@ export default function Chat(){
                     statustext="-"
                   >
                     
-                    {item.newmessages ?  "Messages Unreaded" : "" }
+                    {item.newmessages ?  "New Messages" : "" }
                     
                   </UserCard>
                   
@@ -591,10 +599,6 @@ export default function Chat(){
                 onClick={() =>  sendMessage()}
                 className="btn"
                 >Send Message</button>
-                <button 
-                onClick={() =>  userStatus()}
-                className="btn"
-                >User Status</button>
 
               <p>{statusMessageSended}</p>
 
