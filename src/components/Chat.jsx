@@ -144,10 +144,12 @@ export default function Chat(){
 
   useEffect(()=>{
     if(subscribeRooms){
-      setSubscribeRooms(false);
+      
+
       chatRooms.map((item, idx)=>{
-        console.log("Subs",idx,item);
+        //console.log("Subs",idx,item);
         subscribeRoom(item.room);
+        setSubscribeRooms(false);
         }
       )
     }
@@ -275,7 +277,7 @@ export default function Chat(){
   }
 
   const subscribeRoom = async (roomName) =>{
-    //console.log(roomName);
+    console.log(roomName);
     const res = await axios.post( baseurl+"/subscribe_room", {
       "user": userName+'@'+DOMAIN,
       "nick": userName,
@@ -288,7 +290,7 @@ export default function Chat(){
       }
     });
     if(res.status === 200){
-      //console.log(res);
+      console.log(res);
 
     }else{
       console.log(res);
@@ -362,8 +364,10 @@ export default function Chat(){
             
           }
         }else{
+          //console.log(stanza);
           let chatGroupObject = stanza.children[0].children[0].children[0].children[0].attrs;
           fromText = chatGroupObject.from.split('/')[1];
+          
           messageReceived = ''+messageReceived.children[0].children[0].children[0].children[0];
           receivedChatType = 'groupchat';
           if(fromText === userName){
@@ -376,6 +380,7 @@ export default function Chat(){
         }
         
         const obj =  new objMsg(msgFrom,direction,'datetime',messageReceived,receivedChatType,fromText);
+        console.log(obj);
         
         setMessages(oldarray => [...oldarray,obj ]);
         
