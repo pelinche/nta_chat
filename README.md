@@ -1,27 +1,39 @@
-Iniciando o projeto 02/03/2021 - 13:18
+Project started 02/03/2021
 
-Criação do projeto react
+Project developed using ReactJS, integrated with XMPP Ejabberd server to exchange messages in real time. The implementation includes an administrative area (Admin Area), where it is possible to list the connected users, list the registered users, include, modify, and exclude. It is also possible to register Rooms (MUC), and exclude them. By default, all users are included in all rooms.
 
-npx create-react-app nta_chat
+In addition to the administrative area, it is possible to log in to the chat, informing username and password. The user's access to the server is unique, that is, if the user is logged in at one location, and logs in at a new location, the first connection will be closed, and the new connection will receive messages.
 
-Instalação das dependencias para comunicação com protocolo XMPP
+Project information:
+Administrative area
 
-Informações sobre o projeto:
-Área administrativa
+- Obtain information from users
+- CRUD users and Chat Rooms
+- Obtain Server Status information
 
-- Obter informações dos usuários
-- CRUD de usuários e de Salas de bate papo
-- Obter informações do Status do Servidor
+Chat Area
 
-Área do Chat
+- List of registered users (available for conversation)
+- List of available rooms (all users are linked by default to all available rooms)
+- The user is notified by sound when one receives a new message
+- The user is notified with a screen message, just below the user's name that there are new messages for the other user / chat room.
 
-- Lista dos usuários cadastrados (disponíveis para conversa)
-- Lista das salas disponíveis (todos os usuários são vinculados por padrão a todas as salas disponíveis)
-- O usuário é notificado por som quando uma recebe uma nova mensagem
-- O usuário é notificado com uma mensagem em tela, logo abaixo ao nome do usuário que existem novas mensagens para do outro usuário / sala de conversação.
+All conversations are individual - it is necessary to select the user / room to see the exchange of messages between the participants.
 
-Todas as conversações são individuais - sendo necessário selecionar o usuário / sala para ver a troca de mensagens entre os participantes.
+The functionality that I found important, and that I was able to implement, is to allow a single access per user. In this way, if the user logs in to more than one computer, the previous connection is closed. Another relevant point, was to place a notification by sound (which can be deactivated) to alert the user of the arrival of a new message.
 
-A funcionalidade que achei importante, e que consegui implementar, é a de permitir um único acesso por usuário. Desta forma, se o usuário efetuar login em mais de um computador, a conexão anterior é encerrada. Outra informação ponto relevante, foi o de colocar uma notificação por som (que pode ser desativada) para alertar ao usuário da chegada de uma nova mensagem.
+How to run
 
-O servidor ejabberd usado para os testes, e que está vinculado a aplicação está rodando em minha máquina. Ele ficará disponível para os testes.
+Clone the project:
+git clone https://github.com/pelinche/nta_chat.git
+
+Enter folder nta_chat
+
+Edit file .env to configure the admin credentials, and the API base url and websockect address (Default credentials are defined)
+
+build a docker image
+
+docker build -t nta_chat:dev .
+
+To Run
+docker run -it --rm -v /app/node_modules -p 3001:3000 nta_chat:dev
