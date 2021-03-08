@@ -2,7 +2,13 @@ import {useState} from 'react';
 import {  useHistory } from 'react-router-dom';
 
 import axios from 'axios';
-const baseurl = 'http://177.125.244.8:5280/api';
+
+
+const baseurl = process.env.REACT_APP_API_BASE_URL;
+const defaultAdminUsername = process.env.REACT_APP_API_USERNAME;
+const defaultAdminPassword = process.env.REACT_APP_API_PASSWORD;
+const mucService = process.env.REACT_APP_MUC_SERVICE;
+const defaultDomain = process.env.REACT_APP_DEFAULT_DOMAIN;
 
 export default function Admin(){
   
@@ -25,8 +31,8 @@ export default function Admin(){
   const statusServer = async () =>{
     const res = await axios.post( baseurl+"/status", {}, {
       auth: {
-        username: 'admin@localhost',
-        password: 'password'
+        username: defaultAdminUsername,
+        password: defaultAdminPassword
       }
     });
     if(res.status === 200){
@@ -42,8 +48,8 @@ export default function Admin(){
     
     const res = await axios.post( baseurl+"/connected_users", {}, {
       auth: {
-        username: 'admin@localhost',
-        password: 'password'
+        username: defaultAdminUsername,
+        password: defaultAdminPassword
       }
     });
     if(res.status === 200){
@@ -59,11 +65,11 @@ export default function Admin(){
   const getRegisteredUsers = async () =>{
     setEditingUser(false);
     const res = await axios.post( baseurl+"/registered_users", {
-      "host": "localhost"
+      "host": defaultDomain
     }, {
       auth: {
-        username: 'admin@localhost',
-        password: 'password'
+        username: defaultAdminUsername,
+        password: defaultAdminPassword
       }
     });
     if(res.status === 200){
@@ -82,12 +88,12 @@ export default function Admin(){
 
       const res = await axios.post( baseurl+"/register",{
         "user": user_Username,
-        "host": "localhost" ,
+        "host": defaultDomain ,
         "password": user_Password
       }, {
         auth: {
-          username: 'admin@localhost',
-          password: 'password'
+          username: defaultAdminUsername,
+          password: defaultAdminPassword
         }
         
       });
@@ -109,11 +115,11 @@ export default function Admin(){
     setEditingUser(false);
     const res = await axios.post( baseurl+"/unregister",{
       "user": userName.item,
-      "host": "localhost" ,
+      "host": defaultDomain ,
     }, {
       auth: {
-        username: 'admin@localhost',
-        password: 'password'
+        username: defaultAdminUsername,
+        password: defaultAdminPassword
       }
       
     });
@@ -145,11 +151,11 @@ export default function Admin(){
   
   const getChatRooms = async () =>{
     const res = await axios.post( baseurl+"/muc_online_rooms", {
-      "service": "conference.localhost"
+      "service": mucService
     }, {
       auth: {
-        username: 'admin@localhost',
-        password: 'password'
+        username: defaultAdminUsername,
+        password: defaultAdminPassword
       }
     });
     if(res.status === 200){
@@ -166,12 +172,12 @@ export default function Admin(){
   const res = await axios.post( baseurl+"/create_room", {
     
     "name": chatRoomName,
-    "service": "conference.localhost",
-    "host": "localhost"
+    "service": mucService,
+    "host": defaultDomain
   }, {
     auth: {
-      username: 'admin@localhost',
-      password: 'password'
+      username: defaultAdminUsername,
+      password: defaultAdminPassword
     }
   });
   if(res.status === 200){
@@ -194,8 +200,8 @@ console.log(roomName.item);
     "service": room[1] ,
   }, {
     auth: {
-      username: 'admin@localhost',
-      password: 'password'
+      username: defaultAdminUsername,
+      password: defaultAdminPassword
     }
     
   });

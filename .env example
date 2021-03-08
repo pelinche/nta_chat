@@ -1,0 +1,6 @@
+REACT_APP_API_BASE_URL="https://xmpp.beta.sip2sip.net/api/"
+REACT_APP_API_USERNAME="admin@beta.sip2sip.net"
+REACT_APP_API_PASSWORD="Ff2A6HCp"
+REACT_APP_MUC_SERVICE="conference.beta.sip2sip.net"
+REACT_APP_DEFAULT_DOMAIN="beta.sip2sip.net"
+REACT_APP_WEBSOCKET_ENDPOINT="wss://xmpp.beta.sip2sip.net:443/ws"

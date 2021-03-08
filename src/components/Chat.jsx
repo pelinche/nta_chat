@@ -13,13 +13,13 @@ const debug = require('@xmpp/debug');
 
 
 
-const baseurl = 'http://177.125.244.8:5280/api';
+const baseurl = process.env.REACT_APP_API_BASE_URL;
+const URL = process.env.REACT_APP_WEBSOCKET_ENDPOINT;
+const DOMAIN = process.env.REACT_APP_DEFAULT_DOMAIN;
+const defaultAdminUsername = process.env.REACT_APP_API_USERNAME;
+const defaultAdminPassword = process.env.REACT_APP_API_PASSWORD;
+const mucService = process.env.REACT_APP_MUC_SERVICE;
 
-
-//const URL = 'ws://127.0.0.1:5280/websocket';
-const URL = 'ws://177.125.244.8:5280/websocket';
-//const URL = 'wss://xmpp.beta.sip2sip.net:443/ws';
-const DOMAIN = 'localhost';
 
 
 class objMsg{
@@ -180,8 +180,8 @@ export default function Chat(){
       "host" : DOMAIN
     }, {
       auth: {
-        username: 'admin@localhost',
-        password: 'password'
+        username: defaultAdminUsername,
+        password: defaultAdminPassword
       }
     });
     if(res.status === 200){
@@ -218,11 +218,11 @@ export default function Chat(){
   const getRegisteredUsers = async () =>{
     
     const res = await axios.post( baseurl+"/registered_users", {
-      "host": "localhost"
+      "host": DOMAIN
     }, {
       auth: {
-        username: 'admin@localhost',
-        password: 'password'
+        username: defaultAdminUsername,
+        password: defaultAdminPassword
       }
     });
     if(res.status === 200){
@@ -250,11 +250,11 @@ export default function Chat(){
 
   const getChatRooms = async () =>{
     const res = await axios.post( baseurl+"/muc_online_rooms", {
-      "service": "conference.localhost"
+      "service": mucService
     }, {
       auth: {
-        username: 'admin@localhost',
-        password: 'password'
+        username: defaultAdminUsername,
+        password: defaultAdminPassword
       }
     });
     if(res.status === 200){
@@ -277,7 +277,7 @@ export default function Chat(){
   }
 
   const subscribeRoom = async (roomName) =>{
-    console.log(roomName);
+    //console.log(roomName);
     const res = await axios.post( baseurl+"/subscribe_room", {
       "user": userName+'@'+DOMAIN,
       "nick": userName,
@@ -285,12 +285,12 @@ export default function Chat(){
       "nodes": "urn:xmpp:mucsub:nodes:messages,urn:xmpp:mucsub:nodes:affiliations"
     }, {
       auth: {
-        username: 'admin@localhost',
-        password: 'password'
+        username: defaultAdminUsername,
+        password: defaultAdminPassword
       }
     });
     if(res.status === 200){
-      console.log(res);
+      //console.log(res);
 
     }else{
       console.log(res);
@@ -380,7 +380,7 @@ export default function Chat(){
         }
         
         const obj =  new objMsg(msgFrom,direction,'datetime',messageReceived,receivedChatType,fromText);
-        console.log(obj);
+        
         
         setMessages(oldarray => [...oldarray,obj ]);
         
