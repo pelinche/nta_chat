@@ -36,4 +36,5 @@ build a docker image
 docker build -t nta_chat:dev .
 
 To Run
+
 docker run -it --rm -v /app/node_modules -p 3001:3000 nta_chat:dev
